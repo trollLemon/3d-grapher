@@ -8,7 +8,7 @@ edition = "2021"
 [dependencies]
 poll-promise = { version = "0.1.0", features = ["tokio"] }
 tokio = { version = "1.17.0", features = ["full"] }
-egui = "0.17.0"
+eframe = "0.17.0"
 
 [dependencies.sdl2]
 version = "0.35.2" 
