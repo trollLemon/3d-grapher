@@ -17,7 +17,7 @@ pub async fn vector_function_calculator(parametric: String) -> Vec<[i64; 2]> {
     let mut counter = 0;
 
     while counter <= 1000 {
-        let output = math::do_some_math(parsed_eq.to_string(), counter);
+        let output = math::do_some_math(parsed_eq.to_string());
 
         values.push([counter, output]);
 

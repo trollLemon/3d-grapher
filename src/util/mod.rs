@@ -73,6 +73,9 @@ fn remove_spaces(stringy: String) -> String {
     new_string
 }
 
+
+
+
 #[cfg(test)]
 mod tests {
     use super::*;

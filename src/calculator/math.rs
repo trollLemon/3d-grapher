@@ -6,22 +6,22 @@ use crate::calculator::math::tasks::Sub;
 
 
 pub fn calculate(string: String, t: i64) -> i64 {
-    parse(string,t).parse::<i64>().unwrap()
+   
+    parse(string).parse::<i64>().unwrap()
 
 } 
 
 
-fn parse(string: String, var: i64)-> String {
+fn parse(string: String)-> String {
     
     
    
    
 
-   // if ( terms.0 != '(' && terms.1 != ')' ) ||  ( terms.0 != '(' && terms.1 != ')' ) {
             if string.chars().nth(0).unwrap() == '(' && string.chars().nth(6).unwrap() == ')'{
         	
         
-        do_some_math(string, var).to_string()
+        do_some_math(string).to_string()
 
 
 
@@ -34,21 +34,21 @@ fn parse(string: String, var: i64)-> String {
 	let mut new_string: String ="".to_string();
 	
 	let first = get_op_and_first_term(&string);
-	let second = parse(cut_out_second_term(&string), var);
+	let second = parse(cut_out_second_term(&string));
 
 
         new_string.push_str(first.as_str());
 	new_string.push_str(second.as_str());
 	new_string.push_str(")");
        
-        do_some_math(new_string, var).to_string()
+        do_some_math(new_string).to_string()
 
 	} else if terms.0 == '(' {
 	 
 	
 	let mut new_string: String ="".to_string();
 	
-	let first = parse(cut_out_first_term(&string), var);
+	let first = parse(cut_out_first_term(&string));
 	
 	let second = cut_out_second_term(&string);
 	
@@ -59,7 +59,7 @@ fn parse(string: String, var: i64)-> String {
 	new_string.push_str(second.as_str());
 	new_string.push_str(")");
        
-        do_some_math(new_string, var).to_string()
+        do_some_math(new_string).to_string()
 	
 	} else {
 	
@@ -213,7 +213,7 @@ enum tasks {
     Div,
 }
 
-pub  fn do_some_math(parsed_string: String, x: i64) -> i64 {
+pub  fn do_some_math(parsed_string: String) -> i64 {
 
 
 	
@@ -286,13 +286,13 @@ mod tests {
     fn tests() {
         let parsed = "(- 2 3)";
 
-        let math = do_some_math(parsed.to_string(), 0);
+        let math = do_some_math(parsed.to_string());
 
         assert_eq!(math, -1);
 
         let parsed = "(+ 2 2)";
 
-        let math = do_some_math(parsed.to_string(), 0);
+        let math = do_some_math(parsed.to_string());
 
         assert_eq!(math, 4);
 
@@ -321,7 +321,7 @@ mod tests {
         let parsed = "(- 2 3)".to_string();
         let var = 1;
 
-        let answer = parse(parsed, var);
+        let answer = parse(parsed);
     
         let expected = "-1".to_string();
 
@@ -338,7 +338,7 @@ mod tests {
 
         let parsed = "(+ 1 (* 2 3))".to_string();
         
-        let answer = parse(parsed, var);
+        let answer = parse(parsed);
         
          let expected = "7".to_string();
 
@@ -357,7 +357,7 @@ mod tests {
 
         let parsed = "(+ (+ 1 (* (* 2 5) 3)) 2)".to_string();
         
-        let answer = parse(parsed, var);
+        let answer = parse(parsed);
         
          let expected = "33".to_string();
 
