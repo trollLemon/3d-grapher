@@ -4,10 +4,11 @@ use crate::calculator::math::tasks::Mult;
 use crate::calculator::math::tasks::Sub;
 
 
-
+//replaces the variable with the number we want to calculate at, and runs the calculation
+//this is to be used after the string is converted into S-expressions
 pub fn calculate(string: String, t: i64) -> i64 {
-   
-    parse(string).parse::<i64>().unwrap()
+   let equation = str::replace(string.as_str(),"t", t.to_string().as_str() );
+    parse(equation).parse::<i64>().unwrap()
 
 } 
 
@@ -360,6 +361,32 @@ mod tests {
         let answer = parse(parsed);
         
          let expected = "33".to_string();
+
+         assert_eq!(answer,expected);
+
+
+    }
+    
+          #[test]
+    fn test_with_variables() {
+    
+        let var = 1;
+
+        let parsed = "(+ (+ t (* (* 2 5) 3)) 2)".to_string();
+        
+        let answer = calculate(parsed, var);
+        
+         let expected = 33;
+
+         assert_eq!(answer,expected);
+         
+         let var = 1;
+
+        let parsed = "(+ (+ t (* (* 2 5) t)) 2)".to_string();
+        
+        let answer = calculate(parsed, var);
+        
+         let expected = 13;
 
          assert_eq!(answer,expected);
 
