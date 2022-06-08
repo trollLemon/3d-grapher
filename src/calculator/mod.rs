@@ -1,13 +1,7 @@
 mod equation_handeler;
 mod math;
 
-use std::collections::BTreeMap;
 
-enum EquationSlice {
-    Part(),
-    EquationSlice,
-    End,
-}
 
 pub async fn vector_function_calculator(parametric: String) -> Vec<[i64; 2]> {
     let parsed_eq = equation_handeler::expr(&parametric);
