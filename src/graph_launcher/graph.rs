@@ -1,9 +1,3 @@
-﻿
-
-pub fn run() -> Result<(), String> {
-
-
-
-
+﻿pub fn run() -> Result<(), String> {
     Ok(())
 }
