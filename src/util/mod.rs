@@ -42,10 +42,6 @@ pub fn parse_input(input: &String) -> [String; 3] {
 
     //now we can return the array
     [fin_x, fin_y, fin_z]
-
-        
-
-            
 }
 
 /*helper functions*/
@@ -72,9 +68,6 @@ fn remove_spaces(stringy: String) -> String {
 
     new_string
 }
-
-
-
 
 #[cfg(test)]
 mod tests {
