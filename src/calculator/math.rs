@@ -22,7 +22,8 @@ use crate::calculator::equation_handeler::expr;
 pub struct substitution {
 
     var: char,
-    equation: String    
+    equation: String,
+    replace_with: String    
 }
 
 
@@ -32,6 +33,47 @@ impl substitution {
   pub  fn sub(&mut self, v: char, eq: String) {
         self.var = v;
         self.equation = eq;
+        self.replace_with = match self.var {
+        'u'=>{
+        
+            let mut string : String = String::from("");
+            let length = self.equation.len();
+
+            string.push_str("S{");
+            string.push_str(&self.equation[4..length-1]);
+            string.push_str("}");
+            string
+
+
+        },
+        'j' =>{
+           let mut string : String = String::from("");
+            let length = self.equation.len();
+
+            string.push_str("C{");
+            string.push_str(&self.equation[4..length-1]);
+            string.push_str("}");
+            string
+
+
+        },
+        'k' =>{ 
+           let mut string : String = String::from("");
+            let length = self.equation.len();
+
+            string.push_str("T{");
+            string.push_str(&self.equation[4..length-1]);
+            string.push_str("}");
+            string
+
+        },
+        _ => {
+    
+            panic!("could not find required substitution variable");
+        },
+        
+        
+        }
   } 
 }
 
@@ -44,18 +86,22 @@ pub fn init_input (string: String) -> String{
       let mut  sin_sub = substitution {
         var: 'i',
         equation: "init".to_string(),
+        replace_with: "NAN".to_string(),
 
       };
       
       let mut  cos_sub = substitution {
         var: 'i',
         equation: "init".to_string(),
+          replace_with: "NAN".to_string(),
+
 
       };
       
       let mut  tan_sub = substitution {
         var: 'i',
         equation: "init".to_string(),
+        replace_with: "NAN".to_string(),
 
       };
 
@@ -70,7 +116,7 @@ pub fn init_input (string: String) -> String{
             
               b'S' => {
                 let end_of_slice = look_for_end(curr_slice); //find the end of the trig function
-                sin_sub.sub('j', string[counter..end_of_slice].to_string());                   
+                sin_sub.sub('u', string[counter..end_of_slice].to_string());                   
               },
               b'C' => {
                 let end_of_slice = look_for_end(curr_slice);
@@ -112,20 +158,20 @@ pub fn init_input (string: String) -> String{
     }    
     
 
-    let ready = expr(new_string.as_str()).to_string();
+   let ready = expr(new_string.as_str()).to_string();
     let mut output = String::from("");
 
     //ok now replace the substituted variable with the trig stuff
     if do_sin {
 
-        output.push_str(ready.replace(sin_sub.var.to_string().as_str(), sin_sub.equation.to_string().as_str()).as_str());
+        output.push_str(ready.replace(sin_sub.var.to_string().as_str(), sin_sub.replace_with.as_str()).as_str());
     }
     if do_cos {
-        output.push_str(ready.replace(cos_sub.var.to_string().as_str(), cos_sub.equation.to_string().as_str()).as_str());
+        output.push_str(ready.replace(cos_sub.var.to_string().as_str(), cos_sub.replace_with.as_str()).as_str());
 
     }    
     if do_tan {
-        output.push_str(ready.replace(tan_sub.var.to_string().as_str(), tan_sub.equation.to_string().as_str()).as_str());
+        output.push_str(ready.replace(tan_sub.var.to_string().as_str(), tan_sub.replace_with.as_str()).as_str());
 
 
     }    
@@ -133,7 +179,6 @@ pub fn init_input (string: String) -> String{
     
     	
     output
-
     
 }
 
@@ -691,7 +736,7 @@ mod tests {
     #[test]
     fn test_init_sin() {
     let before = "Sin(3*t) + 4";
-    let after = "(+ Sin(3*t) 4)";
+    let after = "(+ S{3*t} 4)";
 
     let test = init_input(before.to_string());
 
@@ -705,7 +750,7 @@ mod tests {
     #[test]
     fn test_init_cos(){
      let before = "Cos(t) - 3";
-    let after = "(- Cos(t) 3)";
+    let after = "(- C{t} 3)";
 
     let test = init_input(before.to_string());
 
@@ -717,7 +762,7 @@ mod tests {
     
        
     let before = "Tan(t/4) * 8";
-    let after = "(* Tan(t/4) 8)";
+    let after = "(* T{t/4} 8)";
 
     let test = init_input(before.to_string());
 
