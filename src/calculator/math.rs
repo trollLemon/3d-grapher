@@ -28,6 +28,35 @@ pub struct substitution {
 
 
 
+
+#[macro_export]
+macro_rules! rewrite {
+
+    ( $op: expr, $eq: expr ) => {
+
+        {
+            let mut string: String = String::from("");
+            let length = $eq.len();
+
+            let front = 4;
+            
+            
+
+            string.push_str($op);
+            string.push_str("{");
+            string.push_str(&$eq[front..length-1]);
+            string.push_str("}");
+            string
+
+        }
+
+
+    } 
+
+}
+
+
+
 impl substitution {
     
   pub  fn sub(&mut self, v: char, eq: String) {
@@ -36,36 +65,18 @@ impl substitution {
         self.replace_with = match self.var {
         'u'=>{
         
-            let mut string : String = String::from("");
-            let length = self.equation.len();
-
-            string.push_str("S{");
-            string.push_str(&self.equation[4..length-1]);
-            string.push_str("}");
-            string
+                rewrite!("S", self.equation.as_str())
 
 
         },
         'j' =>{
-           let mut string : String = String::from("");
-            let length = self.equation.len();
 
-            string.push_str("C{");
-            string.push_str(&self.equation[4..length-1]);
-            string.push_str("}");
-            string
-
+             rewrite!("C", self.equation.as_str())   
 
         },
         'k' =>{ 
-           let mut string : String = String::from("");
-            let length = self.equation.len();
 
-            string.push_str("T{");
-            string.push_str(&self.equation[4..length-1]);
-            string.push_str("}");
-            string
-
+             rewrite!("T", self.equation.as_str())   
         },
         _ => {
     
