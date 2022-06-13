@@ -78,9 +78,8 @@ impl substitution {
 }
 
 
-//perform the u substitution (if needed), and then throw the string into the pratt parser
 
-pub fn init_input (string: String) -> String{
+pub fn convert_to_parsed_input (string: String) -> String{
     
 
       let mut  sin_sub = substitution {
@@ -145,6 +144,13 @@ pub fn init_input (string: String) -> String{
     let do_cos : bool = cos_sub.var != 'i';
     let do_tan : bool = tan_sub.var != 'i';
 
+
+    
+    if !do_sin && !do_cos && !do_tan {
+        
+     string
+    } else {
+
     if do_sin {
     new_string.push_str(string.replace(sin_sub.equation.as_str(), sin_sub.var.to_string().as_str()).as_str());
     }
@@ -180,6 +186,8 @@ pub fn init_input (string: String) -> String{
     	
     output
     
+    }
+    
 }
 
 
@@ -204,11 +212,10 @@ pub fn look_for_end(string:&String) -> usize {
 
 
 //replaces the variable with the number we want to calculate at, and runs the calculation
-//this is to be used after the string is converted into S-expressions
 pub fn calculate(string: String, t: i64) -> i64 {
    
-  // let sring =  init_input(string);
-    let equation = str::replace(string.as_str(),"t", t.to_string().as_str() );
+   let new =  convert_to_parsed_input(string);
+    let equation = str::replace(new.as_str(),"t", t.to_string().as_str() );
     parse(equation).parse::<i64>().unwrap()
 
 } 
@@ -738,7 +745,7 @@ mod tests {
     let before = "Sin(3*t) + 4";
     let after = "(+ S{3*t} 4)";
 
-    let test = init_input(before.to_string());
+    let test = convert_to_parsed_input(before.to_string());
 
     assert_eq!(test, after);
     
@@ -752,7 +759,7 @@ mod tests {
      let before = "Cos(t) - 3";
     let after = "(- C{t} 3)";
 
-    let test = init_input(before.to_string());
+    let test = convert_to_parsed_input(before.to_string());
 
     assert_eq!(test, after);
     } 	
@@ -764,7 +771,7 @@ mod tests {
     let before = "Tan(t/4) * 8";
     let after = "(* T{t/4} 8)";
 
-    let test = init_input(before.to_string());
+    let test = convert_to_parsed_input(before.to_string());
 
     assert_eq!(test, after);
 
