@@ -179,14 +179,40 @@ pub fn look_for_end(string: &String) -> usize {
 }
 
 //replaces the variable with the number we want to calculate at, and runs the calculation
-pub fn calculate(string: String, t: i64) -> i64 {
+pub fn calculate(string: String, t: i64) -> f64 {
     let new = convert_to_parsed_input(string);
     let equation = str::replace(new.as_str(), "t", t.to_string().as_str());
-    parse(equation).parse::<i64>().unwrap()
+    parse(equation).parse::<f64>().unwrap()
+}
+
+//determines if the current string slice is the last sub-expression: (+ 1 (* 24 4)) would be false,
+//but (+ 1 2) would be true
+//also, if there are no parentheses, like with C{t+3}, then it will also return true
+
+fn is_last_expr(string: &String) -> bool {
+    let mut left_paren = 0;
+    let mut right_paren = 0;
+
+    for b in string.as_str().as_bytes() {
+        match b {
+            b'(' => {
+                left_paren = left_paren + 1;
+            }
+            b')' => {
+                right_paren = right_paren + 1;
+            }
+            _ => {}
+        }
+    }
+    if left_paren <= 1 && right_paren <= 1 {
+        true
+    } else {
+        false
+    }
 }
 
 fn parse(string: String) -> String {
-    if string.chars().nth(0).unwrap() == '(' && string.chars().nth(6).unwrap() == ')' {
+    if is_last_expr(&string) {
         do_some_math(string).to_string()
     } else {
         let terms = get_terms(&string);
@@ -218,7 +244,7 @@ fn parse(string: String) -> String {
 
             do_some_math(new_string).to_string()
         } else {
-            panic!();
+            panic!("bad input:{}", string);
         }
     }
 }
@@ -310,7 +336,17 @@ enum tasks {
     Div,
 }
 
-pub fn do_some_math(parsed_string: String) -> i64 {
+pub fn do_some_math(parsed_string: String) -> f64 {
+    //if this function gets a single number, we dont need to do any math with it and we can just
+    //return it
+    if !parsed_string[1..].starts_with('+')
+        && !parsed_string[1..].starts_with('-')
+        && !parsed_string[1..].starts_with('*')
+        && !parsed_string[1..].starts_with('/')
+    {
+        return parsed_string.parse::<f64>().unwrap();
+    }
+
     let operator_in_string = get_operator(&parsed_string);
     let operator: tasks = match operator_in_string {
         b'+' => Add,
@@ -318,14 +354,45 @@ pub fn do_some_math(parsed_string: String) -> i64 {
         b'*' => Mult,
         b'/' => Div,
         _ => {
-            panic!();
+            panic!("Bad operator:{}", parsed_string);
         }
     };
 
-    let the_numbers = get_numbers_out_of_string(parsed_string);
+    let mut the_numbers = get_numbers_out_of_string(parsed_string);
 
-    let first_term = the_numbers[0].parse::<i64>().unwrap();
-    let second_term = the_numbers[1].parse::<i64>().unwrap();
+    //if there are things like Sin functions we need to do for any of the terms, do them now
+
+    if the_numbers[0].contains("S") || the_numbers[0].contains("C") || the_numbers[0].contains("T")
+    {
+        let op = the_numbers[0].chars().next().unwrap();
+        let eval = the_numbers[0][1..].replace("{", "(").replace("}", ")");
+
+        let parsed = expr(&eval);
+
+        //the trig function might have stuff we need to evaluate (like 3 * 4), so we should do that first
+        let val = calculate(
+            parsed.to_string(),
+            0, /* since there is no t value in this input, we can set this to zero*/
+        );
+
+        match op {
+            'S' => {
+                the_numbers[0] = val.sin().to_string();
+            }
+            'C' => {
+                the_numbers[0] = val.cos().to_string();
+            }
+            'T' => {
+                the_numbers[0] = val.tan().to_string();
+            }
+            _ => {
+                panic!("Bad operator: {}", op);
+            }
+        }
+    }
+
+    let first_term = the_numbers[0].parse::<f64>().unwrap();
+    let second_term = the_numbers[1].parse::<f64>().unwrap();
 
     match operator {
         Add => first_term + second_term,
@@ -365,13 +432,13 @@ mod tests {
 
         let math = do_some_math(parsed.to_string());
 
-        assert_eq!(math, -1);
+        assert_eq!(math, -1.0);
 
         let parsed = "(+ 2 2)";
 
         let math = do_some_math(parsed.to_string());
 
-        assert_eq!(math, 4);
+        assert_eq!(math, 4.0);
     }
 
     #[test]
@@ -431,7 +498,7 @@ mod tests {
 
         let answer = calculate(parsed, var);
 
-        let expected = 33;
+        let expected = 33.0;
 
         assert_eq!(answer, expected);
 
@@ -441,24 +508,24 @@ mod tests {
 
         let answer = calculate(parsed, var);
 
-        let expected = 13;
+        let expected = 13.0;
 
         assert_eq!(answer, expected);
     }
 
     #[test]
     fn test_calculate() {
-        let parsed = "(- 2 3)".to_string();
+        let parsed = "(- 10 3)".to_string();
         let var = 1;
         let answer = calculate(parsed, var);
-        let expected = -1;
+        let expected = 7.0;
         assert_eq!(answer, expected);
 
         let parsed = "(+ 1 (* 2 3))".to_string();
 
         let var = 8;
 
-        let expected = 7;
+        let expected = 7.0;
         let answer = calculate(parsed, var);
         assert_eq!(answer, expected);
     }
@@ -594,5 +661,32 @@ mod tests {
         let expected: usize = 16;
         let test = look_for_end(&before.to_string());
         assert_eq!(test, expected);
+    }
+
+    #[test]
+    fn calculate_with_trig_sin() {
+        let input = "Sin(3*t)+4".to_string();
+        let var = 3;
+        let answer = calculate(input, var);
+        let expected: f64 = 4.4121184852417565;
+        assert_eq!(answer, expected);
+    }
+
+    #[test]
+    fn calculate_with_trig_cos() {
+        let input = "Cos(3*t)+t".to_string();
+        let var = 3;
+        let answer = calculate(input, var);
+        let expected: f64 = 2.088869738115323;
+        assert_eq!(answer, expected);
+    }
+
+    #[test]
+    fn calculate_with_trig_tan() {
+        let input = "Tan(3)+t".to_string();
+        let var = 3;
+        let answer = calculate(input, var);
+        let expected: f64 = 2.857453456925722;
+        assert_eq!(answer, expected);
     }
 }
