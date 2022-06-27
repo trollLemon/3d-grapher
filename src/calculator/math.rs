@@ -20,7 +20,6 @@ macro_rules! rewrite {
         let length = $eq.len();
 
         let front = 4;
-
         string.push_str($op);
         string.push_str("{");
         string.push_str(&$eq[front..length - 1]);
@@ -35,13 +34,16 @@ impl substitution {
         self.equation = eq;
         self.replace_with = match self.var {
             'u' => {
-                rewrite!("S", self.equation.as_str())
+
+                 rewrite!("S", self.equation.as_str())
             }
             'j' => {
-                rewrite!("C", self.equation.as_str())
+
+             rewrite!("C", self.equation.as_str())
             }
             'k' => {
                 rewrite!("T", self.equation.as_str())
+                
             }
             _ => {
                 panic!("could not find required substitution variable");
@@ -51,6 +53,8 @@ impl substitution {
 }
 
 pub fn convert_to_parsed_input(string: String) -> String {
+    
+
     let mut sin_sub = substitution {
         var: 'i',
         equation: "init".to_string(),
@@ -96,7 +100,6 @@ pub fn convert_to_parsed_input(string: String) -> String {
     //doesnt exist
 
     let mut new_string = String::from("");
-
     let do_sin: bool = sin_sub.var != 'i';
     let do_cos: bool = cos_sub.var != 'i';
     let do_tan: bool = tan_sub.var != 'i';
@@ -126,9 +129,9 @@ pub fn convert_to_parsed_input(string: String) -> String {
             );
         }
 
+        
         let ready = expr(new_string.as_str()).to_string();
         let mut output = String::from("");
-
         //ok now replace the substituted variable with the trig stuff
         if do_sin {
             output.push_str(
@@ -180,6 +183,7 @@ pub fn look_for_end(string: &String) -> usize {
 
 //replaces the variable with the number we want to calculate at, and runs the calculation
 pub fn calculate(string: String, t: i64) -> f64 {
+    
     let new = convert_to_parsed_input(string);
     let equation = str::replace(new.as_str(), "t", t.to_string().as_str());
     parse(equation).parse::<f64>().unwrap()
