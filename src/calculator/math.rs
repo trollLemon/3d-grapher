@@ -4,6 +4,7 @@ use crate::calculator::math::tasks::Div;
 use crate::calculator::math::tasks::Mult;
 use crate::calculator::math::tasks::Sub;
 
+
 //we will substitute the trig functions with u, j and k for sin, cos, and tan respectivly, and
 //after the pratt parser puts it in S expression form, we will then replace the substitution with
 //the functions
@@ -52,7 +53,7 @@ impl substitution {
     }
 }
 
-pub fn convert_to_parsed_input(string: String) -> String {
+pub fn convert_to_parsed_input(string:&String) -> String {
     
 
     let mut sin_sub = substitution {
@@ -103,9 +104,8 @@ pub fn convert_to_parsed_input(string: String) -> String {
     let do_sin: bool = sin_sub.var != 'i';
     let do_cos: bool = cos_sub.var != 'i';
     let do_tan: bool = tan_sub.var != 'i';
-
     if !do_sin && !do_cos && !do_tan {
-        string
+        expr( string.to_string().as_str()).to_string()
     } else {
         if do_sin {
             new_string.push_str(
@@ -129,7 +129,6 @@ pub fn convert_to_parsed_input(string: String) -> String {
             );
         }
 
-        
         let ready = expr(new_string.as_str()).to_string();
         let mut output = String::from("");
         //ok now replace the substituted variable with the trig stuff
@@ -163,7 +162,6 @@ pub fn convert_to_parsed_input(string: String) -> String {
                     .as_str(),
             );
         }
-
         output
     }
 }
@@ -182,7 +180,7 @@ pub fn look_for_end(string: &String) -> usize {
 }
 
 //replaces the variable with the number we want to calculate at, and runs the calculation
-pub fn calculate(string: String, t: i64) -> f64 {
+pub fn calculate(string:&String, t: i64) -> f64 {
     
     let new = convert_to_parsed_input(string);
     let equation = str::replace(new.as_str(), "t", t.to_string().as_str());
@@ -375,7 +373,7 @@ pub fn do_some_math(parsed_string: String) -> f64 {
 
         //the trig function might have stuff we need to evaluate (like 3 * 4), so we should do that first
         let val = calculate(
-            parsed.to_string(),
+          &parsed.to_string(),
             0, /* since there is no t value in this input, we can set this to zero*/
         );
 
@@ -629,7 +627,7 @@ mod tests {
         let before = "Sin(3*t) + 4";
         let after = "(+ S{3*t} 4)";
 
-        let test = convert_to_parsed_input(before.to_string());
+        let test = convert_to_parsed_input(&before.to_string());
 
         assert_eq!(test, after);
     }
@@ -639,7 +637,7 @@ mod tests {
         let before = "Cos(t) - 3";
         let after = "(- C{t} 3)";
 
-        let test = convert_to_parsed_input(before.to_string());
+        let test = convert_to_parsed_input(&before.to_string());
 
         assert_eq!(test, after);
     }
@@ -649,7 +647,7 @@ mod tests {
         let before = "Tan(t/4) * 8";
         let after = "(* T{t/4} 8)";
 
-        let test = convert_to_parsed_input(before.to_string());
+        let test = convert_to_parsed_input(&before.to_string());
 
         assert_eq!(test, after);
     }
@@ -671,7 +669,7 @@ mod tests {
     fn calculate_with_trig_sin() {
         let input = "Sin(3*t)+4".to_string();
         let var = 3;
-        let answer = calculate(input, var);
+        let answer = calculate(&input, var);
         let expected: f64 = 4.4121184852417565;
         assert_eq!(answer, expected);
     }
@@ -680,7 +678,7 @@ mod tests {
     fn calculate_with_trig_cos() {
         let input = "Cos(3*t)+t".to_string();
         let var = 3;
-        let answer = calculate(input, var);
+        let answer = calculate(&input, var);
         let expected: f64 = 2.088869738115323;
         assert_eq!(answer, expected);
     }
@@ -689,7 +687,7 @@ mod tests {
     fn calculate_with_trig_tan() {
         let input = "Tan(3)+t".to_string();
         let var = 3;
-        let answer = calculate(input, var);
+        let answer = calculate(&input, var);
         let expected: f64 = 2.857453456925722;
         assert_eq!(answer, expected);
     }
