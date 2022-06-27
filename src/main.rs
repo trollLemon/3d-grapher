@@ -21,12 +21,12 @@ async fn main() {
 
 
     //following is a visual test and will be removed in the future
-
-    let a = calculator::vector_function_calculator("Sin(t)+t".to_string(), 0);
-    let b = calculator::vector_function_calculator("Sin(t)+t".to_string(), 1);
-    let c = calculator::vector_function_calculator("Sin(t)+t".to_string(), 2);
-    let d = calculator::vector_function_calculator("Sin(t)+t".to_string(), 3);
-    let e = calculator::vector_function_calculator("Sin(t)+t".to_string(), 4);
+    //TODO: incrememnt by small values 
+    let a = calculator::vector_function_calculator("Tan(t)+t".to_string(), 0);
+    let b = calculator::vector_function_calculator("Tan(t)+t".to_string(), 1);
+    let c = calculator::vector_function_calculator("Tan(t)+t".to_string(), 2);
+    let d = calculator::vector_function_calculator("Tan(t)+t".to_string(), 3);
+    let e = calculator::vector_function_calculator("Tan(t)+t".to_string(), 4);
     let x = vec![0.0,1.0,2.0,3.0,4.0];
     let y = vec![a,b,c,d,e];
     let n: u8 = 4;
