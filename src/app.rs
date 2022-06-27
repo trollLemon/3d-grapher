@@ -6,25 +6,22 @@ use eframe::{
     epaint::FontFamily,
     epi::App,
 };
+
+use crate::util::remove_spaces;
 use std::io;
 use std::thread;
-
 pub struct UserInput {
-    input: String,
-    message: String,
-    calculation: Option<poll_promise::Promise<Result<(), io::Error>>>,
-    plotting: Option<poll_promise::Promise<Result<(), io::Error>>>,
-    steps: i32,
+    input_x: String,
+    input_y: String,
+    input_z : String,
 }
 
 impl Default for UserInput {
     fn default() -> Self {
         Self {
-            input: "equation".to_owned(),
-            message: "".to_owned(),
-            calculation: None,
-            plotting: None,
-            steps: 0,
+            input_x: "t".to_owned(),
+            input_y: "t*2".to_owned(),
+            input_z: "t/2".to_owned(),
         }
     }
 }
@@ -37,34 +34,39 @@ impl App for UserInput {
             ui.visuals_mut().override_text_color = Some(egui::Color32::LIGHT_GREEN);
             ui.label("equation");
             ui.add_space(10.0);
-            ui.label("r(t)=");
-            ui.text_edit_singleline(&mut self.input);
+            ui.label("r(t)={");
+            ui.label("x(t)=");
+            ui.text_edit_singleline(&mut self.input_x);
+            ui.label("y(t)=");  
+            ui.text_edit_singleline(&mut self.input_y);
+            ui.label("x(t)=");  
+            ui.text_edit_singleline(&mut self.input_z);  
             ui.add_space(30.0);
+            ui.label("}");
 
-            see_what_steps_for_graphing_are_done(&self.calculation, &self.plotting);
-
-            fill_bar(ui, self.steps);
         });
 
         egui::SidePanel::right("side_panel").show(ctx, |ui| {
             ui.add_space(40.0);
             if ui.button("Graph").clicked() {
-                let parametrics = parse_input(&self.input);
-                self.steps = 0;
-                //allocate another thread for the graph so the main thread can still deal with the egui stuff
-
-                self.steps = 1;
+            let x_eq = remove_spaces(&self.input_x);        
+            let y_eq = remove_spaces(&self.input_y);  
+            let z_eq = remove_spaces(&self.input_z);
+            
                 thread::spawn(move || {
-                    spawn().expect("bruh");
+
+                    spawn(x_eq, y_eq, z_eq).expect("error");
+
                 });
+
+
             }
 
-            ui.add_space(40.0);
-            if ui.button("Choose Color").clicked() {
-                println!("f");
             }
-        });
-    }
+            );
+    
+    }        
+    
 
     fn name(&self) -> &str {
         "3D Grapher"
