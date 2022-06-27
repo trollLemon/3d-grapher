@@ -1,9 +1,9 @@
 mod graph;
 use std::io::Error;
 
-pub fn spawn() -> Result<(), Error> {
-    graph::run().unwrap_or_else(|error| {
-        println!("{}", error);
+pub fn spawn(x :String, y:String, z:String) -> Result<(), Error> {
+    graph::run(x,y,z).unwrap_or_else(|error| {
+        println!("um:{}", error);
     });
 
     Ok(())

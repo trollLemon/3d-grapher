@@ -7,10 +7,7 @@ mod graph_launcher;
 mod util;
 use app::UserInput;
 use eframe::{egui::vec2, run_native, NativeOptions};
-use tokio;
-
-#[tokio::main]
-async fn main() {
+ fn main() {
     let app = UserInput::default();
     let mut window_options = NativeOptions::default();
     window_options.initial_window_size = Some(vec2(700.0, 400.0));
