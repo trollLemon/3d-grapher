@@ -36,9 +36,9 @@ pub fn parse_input(input: &String) -> [String; 3] {
     find_char(z_as_bytes, target, &mut z_spaces);
 
     //now that we know where the spaces are, we can remove them and return the strings without spaces
-    let fin_x = remove_spaces(x);
-    let fin_y = remove_spaces(y);
-    let fin_z = remove_spaces(z);
+    let fin_x = remove_spaces(&x);
+    let fin_y = remove_spaces(&y);
+    let fin_z = remove_spaces(&z);
 
     //now we can return the array
     [fin_x, fin_y, fin_z]
@@ -57,7 +57,7 @@ fn find_char(bytes: &[u8], target: u8, list: &mut Vec<usize>) {
     }
 }
 
-fn remove_spaces(stringy: String) -> String {
+pub fn remove_spaces(stringy: &String) -> String {
     let trim_string = stringy.trim();
     let mut new_string = String::new();
     let iterator = trim_string.split_whitespace();
@@ -80,7 +80,7 @@ mod tests {
         let the_string = " hue  huehueh ehu".to_string();
         let expected_string = "huehuehuehehu".to_string();
 
-        let new_string = remove_spaces(the_string);
+        let new_string = remove_spaces(&the_string);
 
         assert_eq!(new_string, expected_string);
     }
