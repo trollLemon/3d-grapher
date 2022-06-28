@@ -1,14 +1,14 @@
 use crate::calculator::equation_handeler::expr;
-use crate::calculator::math::tasks::Add;
-use crate::calculator::math::tasks::Div;
-use crate::calculator::math::tasks::Mult;
-use crate::calculator::math::tasks::Sub;
+use crate::calculator::math::Tasks::Add;
+use crate::calculator::math::Tasks::Div;
+use crate::calculator::math::Tasks::Mult;
+use crate::calculator::math::Tasks::Sub;
 
 
 //we will substitute the trig functions with u, j and k for sin, cos, and tan respectivly, and
 //after the pratt parser puts it in S expression form, we will then replace the substitution with
 //the functions
-pub struct substitution {
+pub struct Substitution {
     var: char,
     equation: String,
     replace_with: String,
@@ -29,7 +29,7 @@ macro_rules! rewrite {
     }};
 }
 
-impl substitution {
+impl Substitution {
     pub fn sub(&mut self, v: char, eq: String) {
         self.var = v;
         self.equation = eq;
@@ -56,19 +56,19 @@ impl substitution {
 pub fn convert_to_parsed_input(string:&String) -> String {
     
 
-    let mut sin_sub = substitution {
+    let mut sin_sub = Substitution {
         var: 'i',
         equation: "init".to_string(),
         replace_with: "NAN".to_string(),
     };
 
-    let mut cos_sub = substitution {
+    let mut cos_sub = Substitution {
         var: 'i',
         equation: "init".to_string(),
         replace_with: "NAN".to_string(),
     };
 
-    let mut tan_sub = substitution {
+    let mut tan_sub = Substitution {
         var: 'i',
         equation: "init".to_string(),
         replace_with: "NAN".to_string(),
@@ -163,7 +163,6 @@ pub fn convert_to_parsed_input(string:&String) -> String {
             );
         }
 
-        println!("{}", &output);
         output
     }
 }
@@ -216,7 +215,6 @@ fn is_last_expr(string: &String) -> bool {
 }
 
 fn parse(string: String) -> String {
-    println!("{}", string);
 
     if is_last_expr(&string) {
         do_some_math(string).to_string()
@@ -336,7 +334,7 @@ fn cut_out_first_term(string: &String) -> String {
     }
 }
 
-enum tasks {
+enum Tasks {
     Add,
     Sub,
     Mult,
@@ -355,7 +353,7 @@ pub fn do_some_math(parsed_string: String) -> f64 {
     }
 
     let operator_in_string = get_operator(&parsed_string);
-    let operator: tasks = match operator_in_string {
+    let operator: Tasks = match operator_in_string {
         b'+' => Add,
         b'-' => Sub,
         b'*' => Mult,
