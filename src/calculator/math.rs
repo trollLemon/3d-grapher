@@ -162,6 +162,8 @@ pub fn convert_to_parsed_input(string:&String) -> String {
                     .as_str(),
             );
         }
+
+        println!("{}", &output);
         output
     }
 }
@@ -214,6 +216,8 @@ fn is_last_expr(string: &String) -> bool {
 }
 
 fn parse(string: String) -> String {
+    println!("{}", string);
+
     if is_last_expr(&string) {
         do_some_math(string).to_string()
     } else {
@@ -251,6 +255,7 @@ fn parse(string: String) -> String {
     }
 }
 
+//TODO: make this work with larger numbers lmao
 fn get_terms(string: &String) -> (char, char) {
     let target: String = string[2..].to_string(); //we dont need the first ( and the operator since we just need the terms
 
@@ -392,7 +397,7 @@ pub fn do_some_math(parsed_string: String) -> f64 {
             }
         }
     }
-
+    println!("{},{}", the_numbers[0], the_numbers[1]);
     let first_term = the_numbers[0].parse::<f64>().unwrap();
     let second_term = the_numbers[1].parse::<f64>().unwrap();
 
@@ -498,7 +503,7 @@ mod tests {
 
         let parsed = "(+ (+ t (* (* 2 5) 3)) 2)".to_string();
 
-        let answer = calculate(parsed, var);
+        let answer = calculate(&parsed, var);
 
         let expected = 33.0;
 
@@ -508,7 +513,7 @@ mod tests {
 
         let parsed = "(+ (+ t (* (* 2 5) t)) 2)".to_string();
 
-        let answer = calculate(parsed, var);
+        let answer = calculate(&parsed, var);
 
         let expected = 13.0;
 
@@ -519,7 +524,7 @@ mod tests {
     fn test_calculate() {
         let parsed = "(- 10 3)".to_string();
         let var = 1;
-        let answer = calculate(parsed, var);
+        let answer = calculate(&parsed, var);
         let expected = 7.0;
         assert_eq!(answer, expected);
 
@@ -528,7 +533,7 @@ mod tests {
         let var = 8;
 
         let expected = 7.0;
-        let answer = calculate(parsed, var);
+        let answer = calculate(&parsed, var);
         assert_eq!(answer, expected);
     }
 
@@ -614,12 +619,12 @@ mod tests {
         assert_eq!(numbers[0], "1");
         assert_eq!(numbers[1], "3");
 
-        let parsed = "(+ 3 x)";
+        let parsed = "(+ 3 10)";
 
         let numbers = get_numbers_out_of_string(parsed.to_string());
 
         assert_eq!(numbers[0], "3");
-        assert_eq!(numbers[1], "x");
+        assert_eq!(numbers[1], "10");
     }
 
     #[test]
