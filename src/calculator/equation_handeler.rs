@@ -4,7 +4,7 @@
   the github is at https://github.com/matklad/minipratt
 */
 
-use std::{fmt, io::BufRead};
+use std::fmt;
 
 pub enum S {
     Atom(char),
@@ -182,7 +182,7 @@ mod tests {
         let s = expr("(((0)))");
         assert_eq!(s.to_string(), "0");
 
-        let s = expr("2*x");
-        assert_eq!(s.to_string(), "(* 2 x)");
+        let s = expr("5*2*3+t+2");
+        assert_eq!(s.to_string(), "(+ (+ (* (* 5 2) 3) t) 2)");
     }
 }

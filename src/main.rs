@@ -2,7 +2,6 @@
 
 mod app;
 mod calculator;
-
 mod graph_launcher;
 mod util;
 use app::UserInput;

@@ -6,16 +6,12 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-poll-promise = { version = "0.1.0", features = ["tokio"] }
-tokio = { version = "1.17.0", features = ["full"] }
 eframe = "0.17.0"
 fastcurve_3d = "0.1.1"
 gnuplot = "0.0.37"
 
 
 
-[dev-dependencies]
-tokio-test = "0.4.2"
 
 
 [profile.dev]
