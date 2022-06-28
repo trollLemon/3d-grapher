@@ -4,7 +4,7 @@
   the github is at https://github.com/matklad/minipratt
 */
 
-use std::{fmt, io::BufRead};
+use std::fmt;
 
 pub enum S {
     Atom(char),
