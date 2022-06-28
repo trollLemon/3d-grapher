@@ -70,7 +70,7 @@ pub fn expr(input: &str) -> S {
 fn expr_bp(lexer: &mut Lexer, min_bp: u8) -> S {
     let mut lhs = match lexer.next() {
         Token::Atom(it) => {
-            print!("{} ", it);
+  //          print!("{} ", it);
             S::Atom(it)
         }
         Token::Op('(') => {
@@ -81,7 +81,7 @@ fn expr_bp(lexer: &mut Lexer, min_bp: u8) -> S {
         Token::Op(op) => {
             let ((), r_bp) = prefix_binding_power(op);
             let rhs = expr_bp(lexer, r_bp);
-            print!("{} ", op);
+//            print!("{} ", op);
             S::Cons(op, vec![rhs])
         }
         t => panic!("bad token: {:?}", t),
