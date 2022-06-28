@@ -24,6 +24,4 @@ The repo is at https://github.com/matklad/minipratt.
 This projects is in a very early stage, so somethings are prone to not work, and some stuff isnt supported (yet).
 
 Current issues that will be fixed later in development:
-console gets flooded with some of the inputed equation data when the graph is created (I have yet to figure out why)
 Trig functions will not graph
-only supports 1 digit numbers, 
