@@ -1,13 +1,8 @@
 use crate::graph_launcher::spawn;
-use eframe::{
-    egui::{self, FontData},
-    egui::{Context, FontDefinitions},
-    epaint::FontFamily,
-    epi::App,
-};
+use eframe::{egui::{self}, epi::App};
+
 
 use crate::util::remove_spaces;
-use std::io;
 use std::thread;
 pub struct UserInput {
     input_x: String,
@@ -72,44 +67,3 @@ impl App for UserInput {
     }
 }
 
-fn fill_bar(ui: &mut eframe::egui::Ui, steps: i32) {
-    match steps {
-        0 => {
-            ui.add(egui::widgets::ProgressBar::new(0.0).desired_width(300.0));
-        }
-        1 => {
-            ui.add(egui::widgets::ProgressBar::new(0.5).desired_width(300.0));
-        }
-        2 => {
-            ui.add(egui::widgets::ProgressBar::new(1.0).desired_width(300.0));
-        }
-        _ => {
-            ui.add(egui::widgets::ProgressBar::new(0.0).desired_width(300.0));
-        }
-    }
-}
-
-fn see_what_steps_for_graphing_are_done(
-    calculation: &Option<poll_promise::Promise<Result<(), io::Error>>>,
-    plotting: &Option<poll_promise::Promise<Result<(), io::Error>>>,
-) {
-    match calculation {
-        Some(calc) => match calc.poll() {
-            std::task::Poll::Ready(_) => {}
-            _ => {}
-        },
-        None => {
-            //do nothing
-        }
-    }
-
-    match plotting {
-        Some(plot) => match plot.poll() {
-            std::task::Poll::Ready(_) => {}
-            _ => {}
-        },
-        None => {
-            //do nothing
-        }
-    }
-}
