@@ -1,6 +1,3 @@
-
-
-
 pub fn remove_spaces(stringy: &String) -> String {
     let trim_string = stringy.trim();
     let mut new_string = String::new();
@@ -12,4 +9,3 @@ pub fn remove_spaces(stringy: &String) -> String {
 
     new_string
 }
-
