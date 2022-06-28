@@ -1,13 +1,15 @@
 use crate::graph_launcher::spawn;
-use eframe::{egui::{self}, epi::App};
-
+use eframe::{
+    egui::{self},
+    epi::App,
+};
 
 use crate::util::remove_spaces;
 use std::thread;
 pub struct UserInput {
     input_x: String,
     input_y: String,
-    input_z : String,
+    input_z: String,
 }
 
 impl Default for UserInput {
@@ -31,39 +33,31 @@ impl App for UserInput {
             ui.label("r(t)={");
             ui.label("x(t)=");
             ui.text_edit_singleline(&mut self.input_x);
-            ui.label("y(t)=");  
+            ui.label("y(t)=");
             ui.text_edit_singleline(&mut self.input_y);
-            ui.label("x(t)=");  
-            ui.text_edit_singleline(&mut self.input_z);  
+            ui.label("x(t)=");
+            ui.text_edit_singleline(&mut self.input_z);
             ui.add_space(30.0);
             ui.label("}");
-
         });
 
         egui::SidePanel::right("side_panel").show(ctx, |ui| {
             ui.add_space(40.0);
             if ui.button("Graph").clicked() {
-            let x_eq = remove_spaces(&self.input_x);        
-            let y_eq = remove_spaces(&self.input_y);  
-            let z_eq = remove_spaces(&self.input_z);
-            
-                thread::spawn(move || {
+                let x_eq = remove_spaces(&self.input_x);
+                let y_eq = remove_spaces(&self.input_y);
+                let z_eq = remove_spaces(&self.input_z);
 
+               thread::spawn(move || {
                     spawn(x_eq, y_eq, z_eq).expect("error");
-
                 });
 
-
             }
+        });
 
-            }
-            );
-    
-    }        
-    
+    }
 
     fn name(&self) -> &str {
         "3D Grapher"
     }
 }
-
