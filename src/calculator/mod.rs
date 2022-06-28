@@ -13,7 +13,7 @@ pub fn get_some_data(parametric: String) ->Vec<f64> {
 
     let mut  vector = vec![];
 
-    let lim = 1000;
+    let lim = 100;
 
     let mut count = 0;
 
