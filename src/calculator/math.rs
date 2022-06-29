@@ -231,6 +231,8 @@ pub mod math_functions {
     }
 
     pub fn parse(string: String) -> String {
+        println!("parsing {}", &string);
+
         if is_last_expr(&string) {
             do_some_math(string).to_string()
         } else {
@@ -364,6 +366,9 @@ pub mod math_functions {
     use crate::calculator::math::math_functions::Tasks::{Add, Div, Mult, Sub};
 
     pub fn do_some_math(parsed_string: String) -> f64 {
+        
+        println!("math with {}", &parsed_string);
+
         //if this function gets a single number, we dont need to do any math with it and we can just
         //return it
         if !parsed_string[1..].starts_with('+')
@@ -421,6 +426,8 @@ pub mod math_functions {
 
         let first_term = the_numbers[0].parse::<f64>().unwrap();
         let second_term = the_numbers[1].parse::<f64>().unwrap();
+        
+        println!("{}, {} are the terms", &first_term, &second_term);
 
         match operator {
             Add => first_term + second_term,
@@ -481,6 +488,19 @@ mod tests {
         let expected = "7".to_string();
 
         assert_eq!(answer, expected);
+        
+       
+
+	let parsed = "(* (* 10 10) 10)".to_string();
+
+        let answer = parse(parsed);
+
+        let expected = "1000".to_string();
+
+        assert_eq!(answer, expected);
+
+
+        
     }
 
     #[test]
