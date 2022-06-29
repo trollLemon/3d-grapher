@@ -7,8 +7,12 @@ pub fn run(x_eq: String, y_eq: String, z_eq: String) -> Result<(), String> {
     let x = calculator::get_some_data(x_eq);
     let y = calculator::get_some_data(y_eq);
     let z = calculator::get_some_data(z_eq);
+    
+    for i in &x {
+        println!("{}", i);
+    }
 
-    let n = 8;
+    let n = 3;
 
     let (xn, yn, zn) = fast_curve_3d(&x, &y, &z, n);
 
