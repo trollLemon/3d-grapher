@@ -9,7 +9,7 @@ pub fn run(x_eq: String, y_eq: String, z_eq: String) -> Result<(), String> {
     let z = calculator::get_some_data(z_eq);
     
     for i in &x {
-        println!("{}", i);
+        println!("value{}", i);
     }
 
     let n = 3;
