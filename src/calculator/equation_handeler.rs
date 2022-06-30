@@ -167,8 +167,8 @@ mod tests {
     use super::*;
     #[test]
     fn tests() {
-        let s = expr("1");
-        assert_eq!(s.to_string(), "1");
+        let s = expr("10");
+        assert_eq!(s.to_string(), "t");
 
         let s = expr("1-3");
         assert_eq!(s.to_string(), "(- 1 3)");
