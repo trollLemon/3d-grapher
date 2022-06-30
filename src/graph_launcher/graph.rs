@@ -8,9 +8,6 @@ pub fn run(x_eq: String, y_eq: String, z_eq: String) -> Result<(), String> {
     let y = calculator::get_some_data(y_eq);
     let z = calculator::get_some_data(z_eq);
     
-    for i in &x {
-        println!("value{}", i);
-    }
 
     let n = 3;
 
