@@ -45,6 +45,8 @@ mod parsing_tools {
     }
 
     pub fn convert_to_parsed_input(string: &String) -> String {
+        
+
         let mut sin_sub = Substitution {
             var: 'i',
             equation: "init".to_string(),
@@ -94,6 +96,8 @@ mod parsing_tools {
         let do_cos: bool = cos_sub.var != 'i';
         let do_tan: bool = tan_sub.var != 'i';
         if !do_sin && !do_cos && !do_tan {
+
+
             expr(string.to_string().as_str()).to_string()
         } else {
             if do_sin {
@@ -117,7 +121,7 @@ mod parsing_tools {
                         .as_str(),
                 );
             }
-
+            
             let ready = expr(new_string.as_str()).to_string();
             let mut output = String::from("");
             //ok now replace the substituted variable with the trig stuff
@@ -220,19 +224,21 @@ mod parsing_tools {
 }
 
 pub mod math_functions {
-    use crate::calculator::equation_handeler::expr;
     use crate::calculator::math::parsing_tools::*;
+    
+
     //replaces the variable with the number we want to calculate at, and runs the calculation
     pub fn calculate(string: &String, t: i64) -> f64 {
+       
         let new = convert_to_parsed_input(string);
         let equation = str::replace(new.as_str(), "t", t.to_string().as_str());
 
         parse(equation).parse::<f64>().unwrap()
-    }
+
+    }     
 
     pub fn parse(string: String) -> String {
-        println!("parsing {}", &string);
-
+        
         if is_last_expr(&string) {
             do_some_math(string).to_string()
         } else {
@@ -268,6 +274,8 @@ pub mod math_functions {
                 panic!("bad input:{}", string);
             }
         }
+
+    
     }
 
     pub fn get_terms(string: &String) -> (String, String) {
@@ -296,33 +304,33 @@ pub mod math_functions {
         if string.chars().nth(3).unwrap() != '(' {
             string[5..string.len() - 1].to_string()
         } else {
-            let target = string[3..].as_bytes();
+            let len = string.len();
+            let target = string[3..len-1].to_string();
+            
+            let mut end_index = target.len();
+               
+            let mut new_string: String = String::from("");
+           
+            //look at the string starting from the end
+            for c in target.chars().rev() {
+                if c.is_whitespace() {
+                break;
+                } else {
+                new_string.push(c);
+                end_index= end_index -1;
 
-            let mut right_paren = 0;
-            let mut left_paren = 1;
-            let mut index = 0;
-
-            for b in target {
-                index = index + 1;
-
-                match b {
-                    b'(' => left_paren = left_paren + 1,
-
-                    b')' => {
-                        right_paren = right_paren + 1;
-                    }
-
-                    _ => {}
                 }
 
-                if left_paren - right_paren == 0 {
-                    break;
-                }
+
+            }
+            
+            //the string we want is backwards, so reverse it before returning it
+            new_string.chars().rev().collect()
             }
 
-            string[index + 1..string.len() - 1].to_string()
+            
         }
-    }
+    
 
     pub fn cut_out_first_term(string: &String) -> String {
         if string.chars().nth(3).unwrap() != '(' {
@@ -364,19 +372,86 @@ pub mod math_functions {
     }
 
     use crate::calculator::math::math_functions::Tasks::{Add, Div, Mult, Sub};
+    
+
+    //determines if a string has an operator in it, which means we need to do math with it (true),
+    //or if the string has no operator in it, which means we dont need to do anything with it
+    //(false)
+    fn dont_math(string :&String) -> bool {
+        
+        if !string.contains('+') && !string.contains('-') && !string.contains('*') && !string.contains('/') && !string.contains('{') && !string.contains('}'){
+            true
+         } else {
+            false
+         }
+    } 
+
+
+    fn is_not_single_trig(string : &String) -> bool {
+        if string.starts_with('S') || string.starts_with('C') || string.starts_with('T') {
+            true
+
+        } else {
+        false
+        }
+
+    }
+    
+    
+    fn trig_func(string: &String)-> String {
+    	 let op = string.chars().next().unwrap();
+          let  mut eval = string[1..].replace("{", "(").replace("}", ")");
+
+            let mut answer = String::new();            
+            if !dont_math(&eval){
+
+                eval = convert_to_parsed_input(&eval);
+                
+                //take off the first ( and last ) 
+                let len: usize = eval.len();
+
+                eval = eval[0..len].to_string();
+                
+            }else{
+            
+                eval = convert_to_parsed_input(&eval);
+
+
+            //the trig function might have stuff we need to evaluate (like 3 * 4), so we should do that first
+            let val = calculate(
+                &eval.to_string(),
+                0, /* since there is no t value in this input, we can set this to zero*/
+            );
+
+            match op {
+                'S' => {
+                    answer = val.sin().to_string();
+                }
+                'C' => {
+                    answer = val.cos().to_string();
+                }
+                'T' => {
+                    answer = val.tan().to_string();
+                }
+                _ => {
+                    panic!("Bad operator: {}", op);
+                }
+            }
+
+            }
+        
+            answer
+    }
 
     pub fn do_some_math(parsed_string: String) -> f64 {
-        
-        println!("math with {}", &parsed_string);
-
-        //if this function gets a single number, we dont need to do any math with it and we can just
-        //return it
-        if !parsed_string[1..].starts_with('+')
-            && !parsed_string[1..].starts_with('-')
-            && !parsed_string[1..].starts_with('*')
-            && !parsed_string[1..].starts_with('/')
-        {
+            
+        if dont_math(&parsed_string){
+            
             return parsed_string.parse::<f64>().unwrap();
+        } 
+
+        if is_not_single_trig(&parsed_string) {
+            return trig_func(&parsed_string).parse::<f64>().unwrap();
         }
 
         let operator_in_string = get_operator(&parsed_string);
@@ -390,44 +465,20 @@ pub mod math_functions {
             }
         };
         let mut the_numbers = get_numbers_out_of_string(parsed_string);
-
+        
         //if there are things like Sin functions we need to do for any of the terms, do them now
 
         if the_numbers[0].contains("S")
             || the_numbers[0].contains("C")
             || the_numbers[0].contains("T")
         {
-            let op = the_numbers[0].chars().next().unwrap();
-            let eval = the_numbers[0][1..].replace("{", "(").replace("}", ")");
-
-            let parsed = expr(&eval);
-
-            //the trig function might have stuff we need to evaluate (like 3 * 4), so we should do that first
-            let val = calculate(
-                &parsed.to_string(),
-                0, /* since there is no t value in this input, we can set this to zero*/
-            );
-
-            match op {
-                'S' => {
-                    the_numbers[0] = val.sin().to_string();
-                }
-                'C' => {
-                    the_numbers[0] = val.cos().to_string();
-                }
-                'T' => {
-                    the_numbers[0] = val.tan().to_string();
-                }
-                _ => {
-                    panic!("Bad operator: {}", op);
-                }
-            }
+            the_numbers[0]= trig_func(&the_numbers[0]);
         }
+        
 
         let first_term = the_numbers[0].parse::<f64>().unwrap();
         let second_term = the_numbers[1].parse::<f64>().unwrap();
         
-        println!("{}, {} are the terms", &first_term, &second_term);
 
         match operator {
             Add => first_term + second_term,
@@ -436,7 +487,9 @@ pub mod math_functions {
             Div => first_term / second_term,
         }
     }
-}
+
+    }
+
 
 #[cfg(test)]
 mod tests {
@@ -528,10 +581,10 @@ mod tests {
 
     #[test]
     fn test_calculate() {
-        let parsed = "10-3".to_string();
+        let parsed = "10".to_string();
         let var = 0;
         let answer = calculate(&parsed, var);
-        let expected = 7.0;
+        let expected = 10.0;
         assert_eq!(answer, expected);
 
         let parsed = "(+ 1 (* 2 3))".to_string();
@@ -607,9 +660,9 @@ mod tests {
 
         assert_eq!(test, expected);
 
-        let parsed = "(+ 1 (* 2 3))".to_string();
+        let parsed = "(* (* 10 10) 10)".to_string();
 
-        let expected = "(* 2 3)".to_string();
+        let expected = "10".to_string();
 
         let test = cut_out_second_term(&parsed);
 
@@ -625,11 +678,11 @@ mod tests {
         assert_eq!(numbers[0], "1");
         assert_eq!(numbers[1], "3");
 
-        let parsed = "(+ 10 10)";
+        let parsed = "(+ 100 10)";
 
         let numbers = get_numbers_out_of_string(parsed.to_string());
 
-        assert_eq!(numbers[0], "10");
+        assert_eq!(numbers[0], "100");
         assert_eq!(numbers[1], "10");
     }
 
