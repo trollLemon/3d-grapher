@@ -35,7 +35,7 @@ impl App for UserInput {
             ui.text_edit_singleline(&mut self.input_x);
             ui.label("y(t)=");
             ui.text_edit_singleline(&mut self.input_y);
-            ui.label("x(t)=");
+            ui.label("z(t)=");
             ui.text_edit_singleline(&mut self.input_z);
             ui.add_space(30.0);
             ui.label("}");
