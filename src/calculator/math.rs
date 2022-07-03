@@ -7,7 +7,12 @@ mod parsing_tools {
         equation: String,
         replace_with: String,
     }
-
+    
+    /*  rewrites a given expression into a new form
+     *  exampele : Sin(t) will be converted into S{t}
+     *  This is so we can distinguish trig functions from 
+     *  everything else
+     */ 
     #[macro_export]
     macro_rules! rewrite {
         ( $op: expr, $eq: expr ) => {{
@@ -44,7 +49,7 @@ mod parsing_tools {
         }
     }
 
-    pub fn convert_to_parsed_input(string: &String) -> String {
+    pub fn convert_input(string: &String) -> String {
         
 
         let mut sin_sub = Substitution {
@@ -230,7 +235,7 @@ pub mod math_functions {
     //replaces the variable with the number we want to calculate at, and runs the calculation
     pub fn calculate(string: &String, t: i64) -> f64 {
        
-        let new = convert_to_parsed_input(string);
+        let new = convert_input(string);
         let equation = str::replace(new.as_str(), "t", t.to_string().as_str());
 
         parse(equation).parse::<f64>().unwrap()
@@ -386,7 +391,7 @@ pub mod math_functions {
          }
     } 
 
-
+    //determines if the given input is a single trig function: like Sin(t), or if its not
     fn is_not_single_trig(string : &String) -> bool {
         if string.starts_with('S') || string.starts_with('C') || string.starts_with('T') {
             true
@@ -405,7 +410,7 @@ pub mod math_functions {
             let mut answer = String::new();            
             if !dont_math(&eval){
 
-                eval = convert_to_parsed_input(&eval);
+                eval = convert_input(&eval);
                 
                 //take off the first ( and last ) 
                 let len: usize = eval.len();
@@ -414,7 +419,7 @@ pub mod math_functions {
                 
             }else{
             
-                eval = convert_to_parsed_input(&eval);
+                eval = convert_input(&eval);
 
 
             //the trig function might have stuff we need to evaluate (like 3 * 4), so we should do that first
@@ -691,7 +696,7 @@ mod tests {
         let before = "Sin(3*t) + 4";
         let after = "(+ S{3*t} 4)";
 
-        let test = convert_to_parsed_input(&before.to_string());
+        let test = convert_input(&before.to_string());
 
         assert_eq!(test, after);
     }
@@ -701,7 +706,7 @@ mod tests {
         let before = "Cos(t) - 3";
         let after = "(- C{t} 3)";
 
-        let test = convert_to_parsed_input(&before.to_string());
+        let test = convert_input(&before.to_string());
 
         assert_eq!(test, after);
     }
@@ -711,7 +716,7 @@ mod tests {
         let before = "Tan(t/4) * 8";
         let after = "(* T{t/4} 8)";
 
-        let test = convert_to_parsed_input(&before.to_string());
+        let test = convert_input(&before.to_string());
 
         assert_eq!(test, after);
     }
