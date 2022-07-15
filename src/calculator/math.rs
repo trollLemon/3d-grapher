@@ -2,7 +2,7 @@ mod parsing_tools {
     
     use crate::calculator::equation_handeler::expr;
     use std::collections::HashMap; 
-
+    use crate::util;
 
     /*  This is used to perform substitutions for strings with trig functions in them.
      *  Substitutions are used so we can represent a trig function with a char (like u), and
@@ -380,6 +380,8 @@ pub mod math_functions {
         let new = convert_input(string);
         let equation = str::replace(new.as_str(), "t", t.to_string().as_str());
         
+        dbg!(&equation);
+
         parse(equation).parse::<f64>().unwrap()
 
     }     
@@ -552,8 +554,13 @@ pub mod math_functions {
     
     
     fn trig_func(string: &String)-> String {
-    	    
-        todo!();
+        
+        
+        
+
+    
+
+        return "bruh".to_string()
     }
 
     pub fn do_some_math(parsed_string: String) -> f64 {
@@ -590,6 +597,8 @@ pub mod math_functions {
         }
         
         let first_term = the_numbers[0].parse::<f64>().unwrap();
+
+
         let second_term = the_numbers[1].parse::<f64>().unwrap();
         
 
