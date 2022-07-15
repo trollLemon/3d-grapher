@@ -1,4 +1,4 @@
-/*following code is a pratt parser based on this article: https://matklad.github.io/2020/04/13/simple-but-powerful-pratt-parsing.html
+/*following code is a pratt parser from this article: https://matklad.github.io/2020/04/13/simple-but-powerful-pratt-parsing.html
   some things are removed since the program will not need to be looking for them (e.i . operator, ? operator, and [])
 
   the github is at https://github.com/matklad/minipratt
@@ -167,8 +167,6 @@ mod tests {
     use super::*;
     #[test]
     fn tests() {
-        let s = expr("10");
-        assert_eq!(s.to_string(), "t");
 
         let s = expr("1-3");
         assert_eq!(s.to_string(), "(- 1 3)");
