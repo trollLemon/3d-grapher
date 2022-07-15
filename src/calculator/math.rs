@@ -444,7 +444,8 @@ pub mod math_functions {
     }
 
     pub fn do_some_math(parsed_string: String) -> f64 {
-            
+       
+
         if dont_math(&parsed_string){
             
             return parsed_string.parse::<f64>().unwrap();
