@@ -1,17 +1,27 @@
 mod parsing_tools {
+    
     use crate::calculator::equation_handeler::expr;
+    use std::collections::HashMap; 
 
+
+    /*  This is used to perform substitutions for strings with trig functions in them.
+     *  Substitutions are used so we can represent a trig function with a char (like u), and
+     *  easily move it around or convert it to a new format without having to worry about string
+     *  length. This struct also stores the converted version of what ever trig function its
+     *  substituting. For example, Sin(t)+4*4*8 will end up looking like; u+4*4*8, and we can then easily
+     *  replace the u with S{t}. 
+     */
     #[derive(Debug, Clone, PartialEq, Eq)]
     pub struct Substitution {
         var: char,
         equation: String,
-        replace_with: String,
+        replace: String,
     }
     
     /*  rewrites a given expression into a new form
      *  exampele : Sin(t) will be converted into S{t}
      *  This is so we can distinguish trig functions from 
-     *  everything else
+     *  everything else, and make it easier to parse
      */ 
     #[macro_export]
     macro_rules! rewrite {
@@ -28,11 +38,12 @@ mod parsing_tools {
         }};
     }
 
+    //implementing a sub function so we can use the substitution struct to help with trig
     impl Substitution {
         pub fn sub(&mut self, v: char, eq: String) {
             self.var = v;
             self.equation = eq;
-            self.replace_with = match self.var {
+            self.replace = match self.var {
                 'u' => {
                     rewrite!("S", self.equation.as_str())
                 }
@@ -48,26 +59,145 @@ mod parsing_tools {
             }
         }
     }
-
+    
+    /* This function take in the user's inputed equation, and
+     * converts it to an S expression:
+     *  3*4+Sin(t) will be converted into (+ (* 3 4) Sin(t))
+     */
     pub fn convert_input(string: &String) -> String {
+       
+        let mut eq_parts: HashMap<i32, &str>= HashMap::new();//this will hold our terms 
+        
+        let eq_iter =  string.split_whitespace();
+       
+        let mut counter = 0; //we will use this counter to represent parts of the function
+        
+        /* put all of the terms into eq_parts, with the counter being the key
+         * for example in 3+4+5/Sin(t), the hashmap will look like this:
+         * 0 -> 3
+         * 1 -> 4
+         * 2 -> 5
+         * 3 -> Sin(t)
+         */
+        for term in eq_iter {
+            if is_term(term) {
+            eq_parts.insert(counter, term);
+            
+            counter +=1;
+            }
+        }
+
+        /* before we put the string into the pratt parser
+         * we need to replace all the terms in the string with 
+         * their keys from the hashmap. This is because
+         * the pratt parser we are using only supports single digit 
+         * numbers.
+         * This is what should happen:
+         *
+         * 3+4+Cos(t*3) will turn into 0+1+2, where 0 is the 
+         * key for 3, 1 is the key for 4, and 2 is the key for Cos(t*3)
+         *
+         * our subsitution string willl be put into the pratt parser,
+         * and we will get:
+         * (+ (+ 1 2) 0)
+         *
+         * and after that we can replace those numbers with our actuall terms
+         * (+ (+ 3 4) Cos(t*3))
+         */
+        
+        let mut new_counter: i64 = 0;
+
+        let mut  substitution_string = String::new();
+
+        let iter = string.split_whitespace(); //we will iterate through each item in the string
+                                              //with this
+
+        /*  Go through each item in the string, and determine if it is a term or an operator.
+         *  If the item is a term (like 3, or Sin(40000000)), we will add the value of new_counter.
+         *  If the item is an operator (like + or -), we will add the item as it is.
+         *  
+         *
+         */
+        for i in iter {
+            if is_term(i){
+            substitution_string.push_str(new_counter.to_string().as_str());
+            new_counter+=1;
+            } else {
+            substitution_string.push_str(i);
+            } 
+        }
+
+        
+        let pratt_string = expr(substitution_string.as_str());//lets get our new string into
+                                                              //S-expression form 
+
+
+        //now we can replace the numbers from the previous loop with our actual terms and numbers,
+        //and then we are done and have the inputed string in the form we need
+       
+
+        let mut final_string = String::new();
+
+        for i in pratt_string.to_string().chars() {
+            
+            let cur_part = String::from(i);
+
+
+            //see if the current char is an operator or not
+            if is_term(cur_part.as_str()) {
+                
+                //TODO: determine what to tell the user if this panics
+                
+                let key = cur_part.parse::<i32>().unwrap();
+                          
+                assert!(eq_parts.contains_key(&key), "");
+
+                final_string.push_str( eq_parts.get(&key).unwrap());
+            } else {
+        
+                final_string.push_str(cur_part.as_str());
+
+            }
+
+        }
+        final_string
+
+    }
+    
+    pub fn is_term(string : &str)-> bool{
+        string != "+" && string != "-" && string != "*" && string != "/" && string != "(" && string != ")" && string != " "   
+    }
+    
+
+    /*  This function is for converting any trig functions present into a new format.
+     *  Im not sure what to call the format, but it looks like this
+     *
+     *  f{expr}
+     *
+     *  where f is a capital letter denoting which trig function to use (i.e S for Sin),
+     *  and expr is the expression (i.e t + 4)
+     *
+     *
+     */
+    pub fn trig_convert(string: &String) -> String {
         
 
         let mut sin_sub = Substitution {
             var: 'i',
             equation: "init".to_string(),
-            replace_with: "NAN".to_string(),
+            replace: String::from("NAN")
         };
 
         let mut cos_sub = Substitution {
             var: 'i',
             equation: "init".to_string(),
-            replace_with: "NAN".to_string(),
+             replace: String::from("NAN")
         };
 
         let mut tan_sub = Substitution {
             var: 'i',
             equation: "init".to_string(),
-            replace_with: "NAN".to_string(),
+             replace: String::from("NAN")
         };
 
         let the_bytes = string.as_bytes();
@@ -92,9 +222,11 @@ mod parsing_tools {
             counter = counter + 1;
         }
 
-        //ok so now we have the positions of the trig function(s), so we can now replace stuff with an
+        // we have the positions of the trig function(s), so we can now replace stuff with an
         //arbituary  letter,u for sin, j for tan. we will also make sure we arent replacing stuff that
         //doesnt exist
+        //
+        dbg!(&sin_sub);
 
         let mut new_string = String::from("");
         let do_sin: bool = sin_sub.var != 'i';
@@ -103,7 +235,7 @@ mod parsing_tools {
         if !do_sin && !do_cos && !do_tan {
 
 
-            expr(string.to_string().as_str()).to_string()
+           expr(string.to_string().as_str()).to_string() 
         } else {
             if do_sin {
                 new_string.push_str(
@@ -135,7 +267,7 @@ mod parsing_tools {
                     ready
                         .replace(
                             sin_sub.var.to_string().as_str(),
-                            sin_sub.replace_with.as_str(),
+                            sin_sub.replace.as_str(),
                         )
                         .as_str(),
                 );
@@ -145,7 +277,7 @@ mod parsing_tools {
                     ready
                         .replace(
                             cos_sub.var.to_string().as_str(),
-                            cos_sub.replace_with.as_str(),
+                            cos_sub.replace.to_string().as_str(),
                         )
                         .as_str(),
                 );
@@ -155,7 +287,7 @@ mod parsing_tools {
                     ready
                         .replace(
                             tan_sub.var.to_string().as_str(),
-                            tan_sub.replace_with.as_str(),
+                            tan_sub.replace.as_str(),
                         )
                         .as_str(),
                 );
@@ -234,14 +366,30 @@ pub mod math_functions {
 
     //replaces the variable with the number we want to calculate at, and runs the calculation
     pub fn calculate(string: &String, t: i64) -> f64 {
-       
+            
+        dbg!(&string);
+
+        //if the inputed string doesnt have any operators in it and does not contain 't', we can
+        //just return it
+
+        if dont_math(&string) && !string.contains('t'){
+            return string.parse::<f64>().unwrap();
+        }
+
+
         let new = convert_input(string);
         let equation = str::replace(new.as_str(), "t", t.to_string().as_str());
-
+        
         parse(equation).parse::<f64>().unwrap()
 
     }     
+    
 
+    /* This function takes in the string that calculate() give it, and evaluates all the 
+     * expressions in the string, starting from the center of the string to the outer parts.
+     * For example, the function will take (+ (* 3 (* 3 2)) 4), and start with (* 3 2) before
+     * moving outwards
+     */
     pub fn parse(string: String) -> String {
         
         if is_last_expr(&string) {
@@ -382,7 +530,7 @@ pub mod math_functions {
     //determines if a string has an operator in it, which means we need to do math with it (true),
     //or if the string has no operator in it, which means we dont need to do anything with it
     //(false)
-    fn dont_math(string :&String) -> bool {
+   pub fn dont_math(string :&String) -> bool {
         
         if !string.contains('+') && !string.contains('-') && !string.contains('*') && !string.contains('/') && !string.contains('{') && !string.contains('}'){
             true
@@ -404,48 +552,8 @@ pub mod math_functions {
     
     
     fn trig_func(string: &String)-> String {
-    	 let op = string.chars().next().unwrap();
-          let  mut eval = string[1..].replace("{", "(").replace("}", ")");
-
-            let mut answer = String::new();            
-            if !dont_math(&eval){
-
-                eval = convert_input(&eval);
-                
-                //take off the first ( and last ) 
-                let len: usize = eval.len();
-
-                eval = eval[0..len].to_string();
-                
-            }else{
-            
-                eval = convert_input(&eval);
-
-
-            //the trig function might have stuff we need to evaluate (like 3 * 4), so we should do that first
-            let val = calculate(
-                &eval.to_string(),
-                0, /* since there is no t value in this input, we can set this to zero*/
-            );
-
-            match op {
-                'S' => {
-                    answer = val.sin().to_string();
-                }
-                'C' => {
-                    answer = val.cos().to_string();
-                }
-                'T' => {
-                    answer = val.tan().to_string();
-                }
-                _ => {
-                    panic!("Bad operator: {}", op);
-                }
-            }
-
-            }
-        
-            answer
+    	    
+        todo!();
     }
 
     pub fn do_some_math(parsed_string: String) -> f64 {
@@ -456,6 +564,7 @@ pub mod math_functions {
         } 
 
         if is_not_single_trig(&parsed_string) {
+
             return trig_func(&parsed_string).parse::<f64>().unwrap();
         }
 
@@ -480,7 +589,6 @@ pub mod math_functions {
             the_numbers[0]= trig_func(&the_numbers[0]);
         }
         
-
         let first_term = the_numbers[0].parse::<f64>().unwrap();
         let second_term = the_numbers[1].parse::<f64>().unwrap();
         
@@ -500,6 +608,49 @@ pub mod math_functions {
 mod tests {
     use crate::calculator::math::math_functions::*;
     use crate::calculator::math::parsing_tools::*;
+   
+
+    #[test]
+    fn test_is_term(){
+
+        let string = "+";
+        let bool_test = is_term(string);
+        assert_eq!(bool_test, false);
+    }
+
+    #[test]
+    fn test_converter(){
+    
+    //single values should just be returned as they are
+    let string = String::from("0");
+    let expected = String::from("0");
+    let acutal = convert_input(&string);
+    assert_eq!(acutal,expected);
+    
+    let string = String::from("Sin(t)");
+    let expected = String::from("Sin(t)");
+    let acutal = convert_input(&string);
+    assert_eq!(acutal,expected);
+
+    
+    //now test with operators involved
+    
+    let string = String::from("10 + 3");
+    let expected = String::from("(+ 10 3)");
+    let acutal = convert_input(&string);
+    assert_eq!(acutal,expected);
+    
+   let string = String::from("1000 * 10");
+   let expected = String::from("(* 1000 10)");
+   let acutal = convert_input(&string);
+   assert_eq!(acutal,expected);
+    
+   let string = String::from("Sin(t+3) * 48");
+   let expected = String::from("(* Sin(t+3) 48)");
+   let acutal = convert_input(&string);
+   assert_eq!(acutal,expected);
+    }
+
     #[test]
     fn tests() {
         let parsed = "(- 2 3)";
@@ -576,7 +727,7 @@ mod tests {
     fn test_with_variables() {
         let var = 1;
 
-        let parsed = "5*2*3+t+2".to_string();
+        let parsed = "5 * 2 * 3 + t + 2".to_string();
         let answer = calculate(&parsed, var);
 
         let expected = 33.0;
@@ -592,7 +743,7 @@ mod tests {
         let expected = 10.0;
         assert_eq!(answer, expected);
 
-        let parsed = "(+ 1 (* 2 3))".to_string();
+        let parsed = "1 + 2 * 3".to_string();
 
         let var = 8;
 
@@ -691,35 +842,6 @@ mod tests {
         assert_eq!(numbers[1], "10");
     }
 
-    #[test]
-    fn test_init_sin() {
-        let before = "Sin(3*t) + 4";
-        let after = "(+ S{3*t} 4)";
-
-        let test = convert_input(&before.to_string());
-
-        assert_eq!(test, after);
-    }
-
-    #[test]
-    fn test_init_cos() {
-        let before = "Cos(t) - 3";
-        let after = "(- C{t} 3)";
-
-        let test = convert_input(&before.to_string());
-
-        assert_eq!(test, after);
-    }
-
-    #[test]
-    fn test_init_tan() {
-        let before = "Tan(t/4) * 8";
-        let after = "(* T{t/4} 8)";
-
-        let test = convert_input(&before.to_string());
-
-        assert_eq!(test, after);
-    }
 
     #[test]
     fn test_find_end_of_trig() {
@@ -733,19 +855,31 @@ mod tests {
         let test = look_for_end(&before.to_string());
         assert_eq!(test, expected);
     }
+        
+
+    #[test]
+    fn trig_formater(){
+    let input = String::from("Sin(2 * t)");
+    let string = String::from("S{2 * t}");
+
+    let test = trig_convert(&input);
+    assert_eq!(test, string);
+    }
 
     #[test]
     fn calculate_with_trig_sin() {
-        let input = "Sin(3*t)+4".to_string();
+        let input = "S{3+t} + t".to_string();
         let var = 3;
+
         let answer = calculate(&input, var);
+        
         let expected: f64 = 4.4121184852417565;
         assert_eq!(answer, expected);
     }
 
     #[test]
     fn calculate_with_trig_cos() {
-        let input = "Cos(3*t)+t".to_string();
+        let input = "C{3+t} + t".to_string();
         let var = 3;
         let answer = calculate(&input, var);
         let expected: f64 = 2.088869738115323;
@@ -754,7 +888,7 @@ mod tests {
 
     #[test]
     fn calculate_with_trig_tan() {
-        let input = "Tan(3)+t".to_string();
+        let input = "T{3} + t".to_string();
         let var = 3;
         let answer = calculate(&input, var);
         let expected: f64 = 2.857453456925722;
