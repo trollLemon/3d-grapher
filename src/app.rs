@@ -4,7 +4,6 @@ use eframe::{
     epi::App,
 };
 
-use crate::util::remove_spaces;
 use std::thread;
 pub struct UserInput {
     input_x: String,
@@ -44,9 +43,9 @@ impl App for UserInput {
         egui::SidePanel::right("side_panel").show(ctx, |ui| {
             ui.add_space(40.0);
             if ui.button("Graph").clicked() {
-                let x_eq = remove_spaces(&self.input_x);
-                let y_eq = remove_spaces(&self.input_y);
-                let z_eq = remove_spaces(&self.input_z);
+                let x_eq = self.input_x.to_string();
+                let y_eq = self.input_y.to_string();
+                let z_eq = self.input_z.to_string();
 
                thread::spawn(move || {
                     spawn(x_eq, y_eq, z_eq).expect("error");
