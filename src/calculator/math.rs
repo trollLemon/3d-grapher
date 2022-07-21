@@ -127,7 +127,9 @@ mod parsing_tools {
             } 
         }
 
-        
+       
+        dbg!(&substitution_string);
+
         let pratt_string = expr(substitution_string.as_str());//lets get our new string into
                                                               //S-expression form 
 
@@ -346,6 +348,8 @@ mod parsing_tools {
 
         let the_bytes = string[2..length - 1].split_whitespace(); //remvove the first two characters because they are not numbers: "(' and an Operator (+ _ * /), and trim the outer spaces away,
         let mut numbers: Vec<String> = vec![];
+            
+        dbg!(&string);
 
         for i in the_bytes {
             let len = &i.len();
@@ -362,7 +366,7 @@ mod parsing_tools {
 
 pub mod math_functions {
     use crate::calculator::math::parsing_tools::*;
-    
+     
 
     //replaces the variable with the number we want to calculate at, and runs the calculation
     pub fn calculate(string: &String, t: i64) -> f64 {
@@ -378,6 +382,9 @@ pub mod math_functions {
 
 
         let new = convert_input(string);
+
+        dbg!(&new);
+
         let equation = str::replace(new.as_str(), "t", t.to_string().as_str());
         
         dbg!(&equation);
@@ -527,8 +534,8 @@ pub mod math_functions {
     }
 
     use crate::calculator::math::math_functions::Tasks::{Add, Div, Mult, Sub};
+    use crate::util::remove_then_add_spaces;
     
-
     //determines if a string has an operator in it, which means we need to do math with it (true),
     //or if the string has no operator in it, which means we dont need to do anything with it
     //(false)
@@ -555,12 +562,43 @@ pub mod math_functions {
     
     fn trig_func(string: &String)-> String {
         
-        
-        
+        let op = string.as_str().chars().nth(0).unwrap();
 
+        let index_0 = 2;
+        let index_1 = string.len()-1;
+
+        let expr = string[index_0..index_1].to_string();
+        
+        let converted_expr= remove_then_add_spaces(&expr);
+    
+        
+        
+        let answer : f64 = calculate(&converted_expr,0);
+
+        let result: String;
+
+        match op {
+
+            'S'=>{
+
+                result = answer.sin().to_string();
+            },
+            'C'=>{
+                 result = answer.cos().to_string();
+            },
+            'T'=>{
+                 result = answer.tan().to_string();
+
+            },
+            _=>{
+
+                panic!();
+            },
+
+        }
     
 
-        return "bruh".to_string()
+        result
     }
 
     pub fn do_some_math(parsed_string: String) -> f64 {
@@ -588,7 +626,7 @@ pub mod math_functions {
         let mut the_numbers = get_numbers_out_of_string(parsed_string);
         
         //if there are things like Sin functions we need to do for any of the terms, do them now
-
+        dbg!(&the_numbers);
         if the_numbers[0].contains("S")
             || the_numbers[0].contains("C")
             || the_numbers[0].contains("T")
@@ -882,7 +920,7 @@ mod tests {
 
         let answer = calculate(&input, var);
         
-        let expected: f64 = 4.4121184852417565;
+        let expected: f64 = 2.720584501801074;
         assert_eq!(answer, expected);
     }
 
@@ -891,7 +929,7 @@ mod tests {
         let input = "C{3+t} + t".to_string();
         let var = 3;
         let answer = calculate(&input, var);
-        let expected: f64 = 2.088869738115323;
+        let expected: f64 = 3.960170286650366;
         assert_eq!(answer, expected);
     }
 
