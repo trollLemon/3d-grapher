@@ -42,11 +42,24 @@ pub fn remove_then_add_spaces(stringy: &String) -> String {
 
     let mut iter_next = new_string.chars();
     iter_next.next(); // shift the second iterator over so its one ahead of iter_main
+    
+    let mut include_space_switch : bool = false;
 
     for a in iter_main {
+
+        if a =='('{
+            include_space_switch = true;
+        }
+
+
+        if a==')'{
+
+            include_space_switch = false;
+        }
+
         if let Some(b) = iter_next.next() {
 
-            if is_part_of_function(&a) && is_part_of_function(&b) || (b.is_numeric() && a.is_numeric()) {
+            if include_space_switch || is_part_of_function(&a) && is_part_of_function(&b) || (b.is_numeric() && a.is_numeric()){
                 output.push(a);
             } else {
                 output.push(a);
@@ -119,7 +132,7 @@ mod tests {
 
         let input = " Sin(t+3) + e + 33   + t".to_string();
 
-        let expected = "Sin( t + 3 ) + e + 33 + t".to_string();
+        let expected = "Sin(t+3) + e + 33 + t".to_string();
 
         let test = remove_then_add_spaces(&input);
 
