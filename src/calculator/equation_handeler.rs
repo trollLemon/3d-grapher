@@ -1,4 +1,4 @@
-/*following code is a pratt parser based on this article: https://matklad.github.io/2020/04/13/simple-but-powerful-pratt-parsing.html
+/*following code is a pratt parser from this article: https://matklad.github.io/2020/04/13/simple-but-powerful-pratt-parsing.html
   some things are removed since the program will not need to be looking for them (e.i . operator, ? operator, and [])
 
   the github is at https://github.com/matklad/minipratt
