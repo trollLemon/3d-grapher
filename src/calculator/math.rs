@@ -34,6 +34,10 @@ mod parsing_tools {
             string.push_str("{");
             string.push_str(&$eq[front..length - 1]);
             string.push_str("}");
+            
+
+            dbg!(&$eq);
+
             string
         }};
     }
@@ -44,21 +48,38 @@ mod parsing_tools {
             self.var = v;
             self.equation = eq;
             self.replace = match self.var {
-                'u' => {
+                'S' => {
                     rewrite!("S", self.equation.as_str())
                 }
-                'j' => {
+                'C' => {
                     rewrite!("C", self.equation.as_str())
                 }
-                'k' => {
+                'T' => {
                     rewrite!("T", self.equation.as_str())
                 }
                 _ => {
                     panic!("could not find required substitution variable");
                 }
             }
-        }
+
+
+                }
+
+    
+            pub fn init() -> Self{
+            
+                Self{
+                var: 'i',
+                equation: "NAN".to_string(),
+                replace: "NAN".to_string(),
+
+                }
+
+
+            }
     }
+
+        
     
     /* This function take in the user's inputed equation, and
      * converts it to an S expression:
@@ -128,7 +149,6 @@ mod parsing_tools {
         }
 
        
-        dbg!(&substitution_string);
 
         let pratt_string = expr(substitution_string.as_str());//lets get our new string into
                                                               //S-expression form 
@@ -178,138 +198,121 @@ mod parsing_tools {
      *
      *  where f is a capital letter denoting which trig function to use (i.e S for Sin),
      *  and expr is the expression (i.e t + 4)
-     *
+     *  S{t+4}
      *
      */
     pub fn trig_convert(string: &String) -> String {
         
+       if !string.contains('S') && !string.contains('C') && !string.contains('T') {
 
-        let mut sin_sub = Substitution {
-            var: 'i',
-            equation: "init".to_string(),
-            replace: String::from("NAN")
-        };
+            return string.to_string()
+       } else  {
 
-        let mut cos_sub = Substitution {
-            var: 'i',
-            equation: "init".to_string(),
-             replace: String::from("NAN")
-        };
+        //if the program reaches here, then we need to find where the trig functions are located
 
-        let mut tan_sub = Substitution {
-            var: 'i',
-            equation: "init".to_string(),
-             replace: String::from("NAN")
-        };
+           let sin_location = string.chars().position(|c| c == 'S');
+           let cos_location = string.chars().position(|c| c == 'C');
+           let tan_location = string.chars().position(|c| c == 'T');
+            
+           
+           let mut result : String = String::new();
+            
+           match sin_location {
+            
+               Some(s) =>{
+                
+               result = sin_rewrite(&string, s); 
 
-        let the_bytes = string.as_bytes();
-        let mut counter: usize = 0;
-        for b in the_bytes {
-            let curr_slice = &string[counter..].to_string();
-            match b {
-                b'S' => {
-                    let end_of_slice = look_for_end(curr_slice); //find the end of the trig function
-                    sin_sub.sub('u', string[counter..end_of_slice].to_string());
-                }
-                b'C' => {
-                    let end_of_slice = look_for_end(curr_slice);
-                    cos_sub.sub('j', string[counter..end_of_slice].to_string());
-                }
-                b'T' => {
-                    let end_of_slice = look_for_end(curr_slice);
-                    tan_sub.sub('k', string[counter..end_of_slice].to_string());
-                }
-                _ => {}
-            }
-            counter = counter + 1;
-        }
+               },
+               None =>{}
 
-        // we have the positions of the trig function(s), so we can now replace stuff with an
-        //arbituary  letter,u for sin, j for tan. we will also make sure we arent replacing stuff that
-        //doesnt exist
-        //
-        dbg!(&sin_sub);
-
-        let mut new_string = String::from("");
-        let do_sin: bool = sin_sub.var != 'i';
-        let do_cos: bool = cos_sub.var != 'i';
-        let do_tan: bool = tan_sub.var != 'i';
-        if !do_sin && !do_cos && !do_tan {
-
-
-           expr(string.to_string().as_str()).to_string() 
-        } else {
-            if do_sin {
-                new_string.push_str(
-                    string
-                        .replace(sin_sub.equation.as_str(), sin_sub.var.to_string().as_str())
-                        .as_str(),
-                );
-            }
-            if do_cos {
-                new_string.push_str(
-                    string
-                        .replace(cos_sub.equation.as_str(), cos_sub.var.to_string().as_str())
-                        .as_str(),
-                );
-            }
-            if do_tan {
-                new_string.push_str(
-                    string
-                        .replace(tan_sub.equation.as_str(), tan_sub.var.to_string().as_str())
-                        .as_str(),
-                );
             }
             
-            let ready = expr(new_string.as_str()).to_string();
-            let mut output = String::from("");
-            //ok now replace the substituted variable with the trig stuff
-            if do_sin {
-                output.push_str(
-                    ready
-                        .replace(
-                            sin_sub.var.to_string().as_str(),
-                            sin_sub.replace.as_str(),
-                        )
-                        .as_str(),
-                );
+              match cos_location {
+            
+               Some(c) =>{
+                
+               result = cos_rewrite(&string, c); 
+
+               },
+               None =>{}
+
             }
-            if do_cos {
-                output.push_str(
-                    ready
-                        .replace(
-                            cos_sub.var.to_string().as_str(),
-                            cos_sub.replace.to_string().as_str(),
-                        )
-                        .as_str(),
-                );
-            }
-            if do_tan {
-                output.push_str(
-                    ready
-                        .replace(
-                            tan_sub.var.to_string().as_str(),
-                            tan_sub.replace.as_str(),
-                        )
-                        .as_str(),
-                );
+            
+              match tan_location {
+            
+               Some(t) =>{
+                
+               result = tan_rewrite(&string, t); 
+
+               },
+               None =>{}
+
             }
 
-            output
-        }
+
+
+        result
+       } 
+
+
+
+
+    }
+
+
+    fn sin_rewrite(eq: &String, index: usize)-> String {
+    
+        let end_of_trig = look_for_end(eq);
+        let string_slice = eq[index..end_of_trig+1].to_string();
+
+        let mut sin_sub = Substitution::init();
+
+        sin_sub.sub('S',string_slice);
+
+        let new_string = eq.replace(sin_sub.equation.as_str(), sin_sub.replace.as_str());
+        
+
+        new_string
+    }
+    
+   
+    fn cos_rewrite(eq: &String, index: usize)-> String {
+    
+        let end_of_trig = look_for_end(eq);
+        let string_slice = eq[index..end_of_trig+1].to_string();
+
+        let mut cos_sub = Substitution::init();
+
+        cos_sub.sub('C',string_slice);
+
+        let new_string = eq.replace(cos_sub.equation.as_str(), cos_sub.replace.as_str());
+        
+
+        new_string
+    }
+    
+        fn tan_rewrite(eq: &String, index: usize)-> String {
+    
+        let end_of_trig = look_for_end(eq);
+        let string_slice = eq[index..end_of_trig+1].to_string();
+
+        let mut tan_sub = Substitution::init();
+
+        tan_sub.sub('T',string_slice);
+
+        let new_string = eq.replace(tan_sub.equation.as_str(), tan_sub.replace.as_str());
+        
+
+        new_string
     }
 
     pub fn look_for_end(string: &String) -> usize {
-        let bytes = string.as_bytes();
-        let mut counter = 0;
+        //we can assume that there will always be a pair of parenthesis, so 
+        //we dont need to worry about this panicing 
+        string.chars().position(|c| c == ')').unwrap() 
+    
 
-        for b in bytes {
-            counter = counter + 1;
-            if *b == b')' {
-                break;
-            }
-        }
-        counter
     }
 
     //determines if the current string slice is the last sub-expression: (+ 1 (* 24 4)) would be false,
@@ -349,7 +352,6 @@ mod parsing_tools {
         let the_bytes = string[2..length - 1].split_whitespace(); //remvove the first two characters because they are not numbers: "(' and an Operator (+ _ * /), and trim the outer spaces away,
         let mut numbers: Vec<String> = vec![];
             
-        dbg!(&string);
 
         for i in the_bytes {
             let len = &i.len();
@@ -371,7 +373,6 @@ pub mod math_functions {
     //replaces the variable with the number we want to calculate at, and runs the calculation
     pub fn calculate(string: &String, t: i64) -> f64 {
             
-        dbg!(&string);
 
         //if the inputed string doesnt have any operators in it and does not contain 't', we can
         //just return it
@@ -379,16 +380,13 @@ pub mod math_functions {
         if dont_math(&string) && !string.contains('t'){
             return string.parse::<f64>().unwrap();
         }
+            
 
+        let new = convert_input(&trig_convert(&string));
 
-        let new = convert_input(string);
-
-        dbg!(&new);
 
         let equation = str::replace(new.as_str(), "t", t.to_string().as_str());
         
-        dbg!(&equation);
-
         parse(equation).parse::<f64>().unwrap()
 
     }     
@@ -655,7 +653,28 @@ pub mod math_functions {
 mod tests {
     use crate::calculator::math::math_functions::*;
     use crate::calculator::math::parsing_tools::*;
-   
+    use  crate::rewrite;
+    
+    #[test]
+    fn test_trig_convert(){
+        let string = String::from("(+ Sin(3+t) t)");
+        let expected = String::from("(+ S{3+t} t)");
+        let actual = trig_convert(&string);   
+
+        assert_eq!(actual, expected);
+
+    }
+
+    #[test]
+    fn test_rewrite() {
+
+        let string = String::from("Sin(4+t)");
+        let expected = String::from("S{4+t}");
+        let actual = rewrite!("S",string);
+
+        assert_eq!(actual, expected);
+
+    }
 
     #[test]
     fn test_is_term(){
@@ -893,12 +912,12 @@ mod tests {
     #[test]
     fn test_find_end_of_trig() {
         let before = "Sin(3*t)+4";
-        let expected: usize = 8;
+        let expected: usize = 7;
         let test = look_for_end(&before.to_string());
         assert_eq!(test, expected);
 
         let before = "Tan(357385950*t)+4";
-        let expected: usize = 16;
+        let expected: usize = 15;
         let test = look_for_end(&before.to_string());
         assert_eq!(test, expected);
     }
@@ -915,7 +934,7 @@ mod tests {
 
     #[test]
     fn calculate_with_trig_sin() {
-        let input = "S{3+t} + t".to_string();
+        let input = "Sin(3+t) + t".to_string();
         let var = 3;
 
         let answer = calculate(&input, var);
@@ -926,7 +945,7 @@ mod tests {
 
     #[test]
     fn calculate_with_trig_cos() {
-        let input = "C{3+t} + t".to_string();
+        let input = "Cos(3+t) + t".to_string();
         let var = 3;
         let answer = calculate(&input, var);
         let expected: f64 = 3.960170286650366;
@@ -935,7 +954,7 @@ mod tests {
 
     #[test]
     fn calculate_with_trig_tan() {
-        let input = "T{3} + t".to_string();
+        let input = "Tan(3) + t".to_string();
         let var = 3;
         let answer = calculate(&input, var);
         let expected: f64 = 2.857453456925722;
